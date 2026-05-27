@@ -137,7 +137,7 @@
                         <div class="legend-item"><div class="dot-val"></div> <span id="legVal"></span></div>
                         <div class="legend-item" id="legendAroItem"><div class="dot-aro"></div> <span id="legAro"></span></div>
                     </div>
-                    <span style="color:var(--text-sub); font-weight: 500;">Space: Play/Pause</span>
+                    <span style="color:var(--text-sub); font-weight: 500;">Space: Play/Pause · Arrows: Adjust rating</span>
                 </div>
             </div>
         </div>
@@ -291,14 +291,27 @@
                 }
                 currentV = xMin + (mx / w) * (xMax - xMin);
                 currentA = disableYAxis ? ((yMin + yMax) / 2) : (yMin + ((h - my) / h) * (yMax - yMin));
-
-                valDisplay.innerText = `${xName}: ${currentV.toFixed(2)}`;
-                if (!disableYAxis) aroDisplay.innerText = `${yName}: ${currentA.toFixed(2)}`;
-                drawGrid();
+                applyRatingPosition();
             }
             gridCanvas.addEventListener('mousedown', (e) => { isDragging = true; updateFromMouse(e); });
             gridCanvas.addEventListener('mousemove', (e) => { if (isDragging) updateFromMouse(e); });
             window.addEventListener('mouseup', () => { isDragging = false; }); drawGrid();
+        }
+
+        const KEY_STEP_RATIO = 0.02;
+        function applyRatingPosition() {
+            currentV = Math.max(xMin, Math.min(xMax, currentV));
+            currentA = disableYAxis ? ((yMin + yMax) / 2) : Math.max(yMin, Math.min(yMax, currentA));
+            valDisplay.innerText = `${xName}: ${currentV.toFixed(2)}`;
+            if (!disableYAxis) aroDisplay.innerText = `${yName}: ${currentA.toFixed(2)}`;
+            drawGrid();
+        }
+        function nudgeRating(dx, dy) {
+            const xStep = (xMax - xMin) * KEY_STEP_RATIO;
+            const yStep = (yMax - yMin) * KEY_STEP_RATIO;
+            if (dx) currentV += dx * xStep;
+            if (dy && !disableYAxis) currentA += dy * yStep;
+            applyRatingPosition();
         }
 
         function drawGrid() {
@@ -382,7 +395,20 @@
             }
         });
         slider.oninput = () => { player.currentTime = slider.value; drawChart(); };
-        window.onkeydown = (e) => { if (e.code === "Space") { e.preventDefault(); player.paused ? player.play() : player.pause(); } };
+        window.onkeydown = (e) => {
+            if (e.code === "Space") {
+                e.preventDefault();
+                player.paused ? player.play() : player.pause();
+                return;
+            }
+            const arrowKeys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
+            if (!arrowKeys.includes(e.code)) return;
+            e.preventDefault();
+            if (e.code === "ArrowLeft") nudgeRating(-1, 0);
+            else if (e.code === "ArrowRight") nudgeRating(1, 0);
+            else if (e.code === "ArrowUp") nudgeRating(0, 1);
+            else if (e.code === "ArrowDown") nudgeRating(0, -1);
+        };
         window.onresize = () => { drawGrid(); drawChart(); };
 
         function getCSVContent() {
