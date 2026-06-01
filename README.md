@@ -17,9 +17,9 @@ In short, ANDrate contains custom configuration for various naturalistic data co
 
 ___
 ## **Downloads**
-* The latest release of ANDrate will be available on https://github.com/haiyan0305/ANDrate/releases
-* Documentation for ANDrate can be accessed via the wiki at https://github.com/haiyan0305/ANDrate/wiki
-* Issues can be reported and features can be requested at https://github.com/haiyan0305/ANDrate/issues
+* The latest release of ANDrate will be available on https://github.com/andlab-um/ANDrate/releases
+* Documentation for ANDrate can be accessed via the wiki at https://github.com/andlab-um/ANDrate/wiki
+* Issues can be reported and features can be requested at https://github.com/andlab-um/ANDrate/issues
 
 ___
 ## **Citations**
