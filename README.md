@@ -34,4 +34,4 @@ Please see [**NATVIEW datasets**](https://github.com/NathanKlineInstitute/NATVIE
 ___
 ## **Contact**
 
-Please contact [**Eric R.W. Wang**](ericwang@um.edu.mo) or Rui Jing for any question
+Please contact [**Eric R.W. Wang**](ericwang@um.edu.mo) or [Rui Jing](jingrui0312@gmail.com) for any question
