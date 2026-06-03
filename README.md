@@ -19,13 +19,24 @@ ___
 ## **Downloads**
 * The latest release of ANDrate will be available on https://github.com/haiyan0305/ANDrate/releases
 * Documentation for ANDrate can be accessed via the wiki at https://github.com/haiyan0305/ANDrate/wiki
-* Issues can be reported and features can be requested at https://github.com/haiyan0305/ANDrate/issues
+* Issues can be reported and features can be requested at https://github.com/andlab/ANDrate/issues
 
 ___
 ## **Citations**
 Users must agree to cite the following article in all publications making use of ANDrate:
 
 Wang, E. R. W., Rui, J., & Wu, H. (2026). ANDrate toolbox: A Tutorial for collecting behavioral data in naturalistic stimuli in a python based toolbox. Retrieved from osf.io/preprints/psyarxiv/j2fpy_v1
+
+
+```
+@article{ANDrate,
+author = {Wang,Eric R W and Jing, Rui and Wu, Haiyan},
+doi = {osf.io/preprints/psyarxiv/j2fpy_v1},
+journal = {psyarvix},
+title = {{ANDrate toolbox: A Tutorial for collecting behavioral data in naturalistic stimuli in a python based toolbox}},
+year = {2026}
+}
+
 
 ___
 ## **Video Datasets**
