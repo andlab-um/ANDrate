@@ -25,7 +25,7 @@ ___
 ## **Citations**
 Users must agree to cite the following article in all publications making use of ANDrate:
 
-Wang, E. R. W., Jing, R., & Wu, H. (n.d.). ANDrate toolbox: A Tutorial for collecting behavioral data in naturalistic stimuli in a python based toolbox. Retrieved from osf.io/preprints/psyarxiv/j2fpy_v1
+Wang, E. R. W., Jing, R., & Wu, H. (2026). ANDrate toolbox: A Tutorial for collecting behavioral data in naturalistic stimuli in a python based toolbox. Retrieved from osf.io/preprints/psyarxiv/j2fpy_v1
 
 ```
 @article{ANDrate,
