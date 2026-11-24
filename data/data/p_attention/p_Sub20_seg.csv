@@ -1,0 +1,9 @@
+﻿Start,End,Label
+0,22000,The boy plays video games alone
+22000,50000,The boy's mother comes home with a present
+50000,88000,The boy opens the present and finds he dislikes it
+88000,134000,The puppy given as a present plays alone
+134000,163000,The boy changes from dislike to interest
+163000,191000,The boy begins playing with the puppy
+191000,205000,The boy and puppy go outside
+205000,259000,End-credit music

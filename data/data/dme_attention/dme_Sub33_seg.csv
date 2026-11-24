@@ -1,0 +1,14 @@
+﻿Start,End,Label
+0,25000,Asking the father to read a bedtime story
+25000,47000,Agreeing to read
+47000,135000,Feeling sleepy
+135000,167000,The children fall asleep
+167000,172000,Being awakened and refusing a goodnight kiss
+172000,220000,The colleague asks him to send the children away
+220000,283000,The minions appear
+283000,303000,Breakfast
+303000,330000,A woman arrives to collect the children
+330000,380000,Getting into the car
+380000,410000,Sadness
+410000,494000,Starting the moon-stealing plan
+494000,580000,Failure

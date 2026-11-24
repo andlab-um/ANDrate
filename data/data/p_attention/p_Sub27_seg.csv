@@ -1,0 +1,7 @@
+﻿Start,End,Label
+0,21000,The protagonist's mother returns home
+21000,51000,The mother tells the protagonist to open the present, and he stops gaming
+51000,71000,The protagonist discovers that the present is a dog, loses interest, and continues gaming
+71000,133000,The protagonist finds the puppy playing with the ball cute and begins to like it
+133000,176000,The protagonist picks up the ball and goes outside to play with the puppy
+176000,259000,End credits

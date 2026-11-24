@@ -1,0 +1,14 @@
+﻿Start,End,Label
+0,17000,Three children play noisily
+17000,43000,The adult tells the children to go to bed
+43000,144000,The adult tells the children a story
+144000,172000,Sleepiness gradually appears
+172000,203000,The story ends and they go to sleep
+203000,276000,The scene changes to Gru alone
+276000,301000,The minions appear, foreshadowing the rocket plan
+301000,335000,Gru plays with the children
+335000,407000,Gru sends the children away
+407000,442000,Gru feels regret and misses the children
+442000,526000,The rocket launch plan officially begins
+526000,598000,A villain causes trouble
+598000,599000,The rocket launch seems to have failed

@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 
 import requests
 from flask import Flask, Response, abort, jsonify, render_template, request, send_from_directory
 
 
-app = Flask(__name__)
+RESOURCE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__, template_folder=os.path.join(RESOURCE_DIR, "templates"),
+            static_folder=os.path.join(RESOURCE_DIR, "static"))
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.environ.get("ANDRATE_HOME") or (os.path.join(os.path.expanduser("~"), "ANDrate") if getattr(sys, "frozen", False) else RESOURCE_DIR)
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 DATA_FOLDER = os.path.join(BASE_DIR, "data")
 CACHE_DIR = os.path.join(BASE_DIR, "mediapipe")
-TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+TEMPLATE_DIR = os.path.join(RESOURCE_DIR, "templates")
 
-for folder in [UPLOAD_FOLDER, DATA_FOLDER, CACHE_DIR, TEMPLATE_DIR]:
+for folder in [UPLOAD_FOLDER, DATA_FOLDER, CACHE_DIR]:
     os.makedirs(folder, exist_ok=True)
 
 MEDIA_EXTENSIONS = (
@@ -50,7 +53,12 @@ def post_rating_analysis():
 
 @app.route("/webgazer.js")
 def serve_lib():
-    return send_from_directory(BASE_DIR, "webgazer.js")
+    return send_from_directory(RESOURCE_DIR, "webgazer.js")
+
+
+@app.route("/precision_calculation.js")
+def serve_precision():
+    return send_from_directory(RESOURCE_DIR, "precision_calculation.js")
 
 
 @app.route("/mediapipe/<path:filename>")
@@ -59,6 +67,10 @@ def proxy_mediapipe(filename):
 
     if os.path.exists(local_path):
         return send_from_directory(CACHE_DIR, filename)
+
+    bundled_path = os.path.join(RESOURCE_DIR, "mediapipe", filename)
+    if os.path.isfile(bundled_path):
+        return send_from_directory(os.path.join(RESOURCE_DIR, "mediapipe"), filename)
 
     remote_sources = [
         f"https://webgazer.cs.brown.edu/mediapipe/{filename}",
@@ -74,7 +86,7 @@ def proxy_mediapipe(filename):
                     for chunk in resp.iter_content(chunk_size=16384):
                         f.write(chunk)
                 print(f"[SYNC SUCCESS] cached locally: {filename}")
-                return Response(resp.content, mimetype=resp.headers.get("content-type"))
+                return send_from_directory(CACHE_DIR, filename)
         except Exception as e:
             print(f"[SYNC WARN] source failed: {url} | error: {e}")
 
@@ -124,7 +136,7 @@ def serve_upload(filename):
 
 @app.route("/static/<path:filename>")
 def serve_static(filename):
-    return send_from_directory(os.path.join(BASE_DIR, "static"), filename)
+    return send_from_directory(os.path.join(RESOURCE_DIR, "static"), filename)
 
 
 @app.route("/api/save", methods=["POST"])

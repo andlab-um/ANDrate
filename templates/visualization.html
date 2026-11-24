@@ -623,41 +623,34 @@
             })).sort((a, b) => a.ms - b.ms);
         }
 
+        function fisherMean(values) {
+            const z = values.filter(Number.isFinite).map(r => Math.atanh(Math.max(-1+1e-12, Math.min(1-1e-12,r))));
+            return z.length ? Math.tanh(z.reduce((a,b)=>a+b,0)/z.length) : NaN;
+        }
+        function signFlipISC(values) {
+            const z=values.filter(Number.isFinite).map(r=>Math.atanh(Math.max(-1+1e-12,Math.min(1-1e-12,r))));
+            if (!z.length) return {n:0, mean:NaN, p:NaN, method:'unavailable', permutations:0};
+            const observed=z.reduce((a,b)=>a+b,0);let exceed=0;
+            const exact=z.length<=18, count=exact?2**z.length:10000;
+            let seed=20261123;const random=()=>{seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296;};
+            for(let k=0;k<count;k++){let sum=0;z.forEach((v,j)=>{sum+=v*(exact?((k>>>j)&1?-1:1):(random()<.5?-1:1));});if(sum>=observed-1e-12)exceed++;}
+            return {n:z.length,mean:fisherMean(values),p:exact?exceed/count:(exceed+1)/(count+1),method:exact?'exact sign flip':'Monte Carlo sign flip',permutations:count};
+        }
+        let iscInference={};
         function computeISC() {
-            iscResults = [];
-            const pids = Array.from(ratingsByParticipant.keys());
-            if (pids.length < 2) return;
-
-            const allMs = new Set();
-            pids.forEach(pid => ratingsByParticipant.get(pid).forEach(d => allMs.add(d.ms)));
-            const msList = Array.from(allMs).sort((a, b) => a - b);
-            const ratingMaps = new Map();
-            pids.forEach(pid => ratingMaps.set(pid, new Map(ratingsByParticipant.get(pid).map(d => [d.ms, d]))));
-
-            pids.forEach(pid => {
-                const selfMap = ratingMaps.get(pid);
-                const others = pids.filter(p => p !== pid);
-
-                const xs = [], ys = [], looXs = [], looYs = [];
-                msList.forEach(ms => {
-                    const self = selfMap.get(ms);
-                    if (!self) return;
-                    let vSum = 0, aSum = 0, cnt = 0;
-                    others.forEach(op => {
-                        const pt = ratingMaps.get(op).get(ms);
-                        if (pt) { vSum += pt.v; aSum += pt.a; cnt++; }
-                    });
-                    if (cnt === 0) return;
-                    xs.push(self.v); ys.push(self.a);
-                    looXs.push(vSum / cnt); looYs.push(aSum / cnt);
-                });
-
-                iscResults.push({
-                    pid,
-                    rX: pearson(xs, looXs),
-                    rY: yAxisEnabled ? pearson(ys, looYs) : NaN
-                });
+            iscResults=[];
+            const pids=Array.from(ratingsByParticipant.keys());
+            const maps=new Map();
+            pids.forEach(pid=>{
+                const rows=ratingsByParticipant.get(pid);
+                const normalize=key=>{const vs=rows.map(d=>d[key]).filter(Number.isFinite);const mu=vs.reduce((a,b)=>a+b,0)/vs.length;const sd=Math.sqrt(vs.reduce((a,b)=>a+(b-mu)**2,0)/vs.length);return v=>Number.isFinite(v)&&sd>0?(v-mu)/sd:NaN;};
+                const nx=normalize('v'),ny=normalize('a');maps.set(pid,new Map(rows.map(d=>[d.ms,{v:nx(d.v),a:ny(d.a)}])));
             });
+            pids.forEach(pid=>{
+                const correlate=key=>{const xs=[],ys=[];maps.get(pid).forEach((self,ms)=>{if(!Number.isFinite(self[key]))return;const others=pids.filter(p=>p!==pid).map(p=>maps.get(p).get(ms)?.[key]).filter(Number.isFinite);if(others.length){xs.push(self[key]);ys.push(others.reduce((a,b)=>a+b,0)/others.length);}});return xs.length>=3?pearson(xs,ys):NaN;};
+                iscResults.push({pid,rX:correlate('v'),rY:yAxisEnabled?correlate('a'):NaN});
+            });
+            iscInference={x:signFlipISC(iscResults.map(r=>r.rX)),y:signFlipISC(iscResults.map(r=>r.rY))};
         }
 
         function buildRegionBar(counts) {
@@ -1104,10 +1097,10 @@
                 panel.className = 'result-panel full-width';
                 const validX = iscResults.map(r => r.rX).filter(v => !isNaN(v));
                 const validY = iscResults.map(r => r.rY).filter(v => !isNaN(v));
-                const meanX = validX.length ? validX.reduce((a, b) => a + b, 0) / validX.length : NaN;
-                const meanY = validY.length ? validY.reduce((a, b) => a + b, 0) / validY.length : NaN;
+                const meanX = fisherMean(validX);
+                const meanY = fisherMean(validY);
                 let html = `<h3>Inter-Subject Correlation (ISC)</h3>
-                    <p class="small-note">Pearson r between each participant and leave-one-out group mean. Histogram bin width = 0.2; black line = mean r.</p>
+                    <p class="small-note">Time-standardized participant ratings; Pearson r against the leave-one-out mean. Black line = Fisher-z mean ISC. Sign-flip p tests positive synchrony; p is uncorrected across analyses.</p>
                     <div class="isc-viz-grid ${yAxisEnabled ? '' : 'single'}">
                         <div>
                             <div class="isc-chart-title">${xName}</div>
@@ -1131,7 +1124,7 @@
                 html += `</tbody></table>`;
                 html += `<p class="isc-summary">Mean ISC (${xName}): ${isNaN(meanX) ? '—' : meanX.toFixed(3)}`;
                 if (yAxisEnabled) html += ` | ${yName}: ${isNaN(meanY) ? '—' : meanY.toFixed(3)}`;
-                html += `</p>`;
+                html += `</p><p>Sign-flip p (${xName}): ${iscInference.x?.p?.toPrecision(4) ?? '—'}${yAxisEnabled ? ' | '+yName+': '+(iscInference.y?.p?.toPrecision(4) ?? '—') : ''} (one-sided, uncorrected).</p>`;
                 panel.innerHTML = html;
                 resultsGrid.appendChild(panel);
                 drawISCHistogram('iscHistX', validX, meanX, xName);
@@ -1543,7 +1536,7 @@
             if (iscResults.length > 0) {
                 const validX = iscResults.map(r => r.rX).filter(v => !isNaN(v));
                 const validY = iscResults.map(r => r.rY).filter(v => !isNaN(v));
-                const mean = values => values.length ? values.reduce((a, b) => a + b, 0) / values.length : NaN;
+                const mean = fisherMean;
                 drawISCHistogram('iscHistX', validX, mean(validX), xName);
                 if (yAxisEnabled) drawISCHistogram('iscHistY', validY, mean(validY), yName);
             }
@@ -1643,6 +1636,9 @@
                     iscCsv += '\n';
                 });
                 downloads.push({ filename: 'ISC_Results.csv', body: iscCsv });
+                let inferCsv='Dimension,N,Fisher_mean_r,P_one_sided_uncorrected,Method,Sign_patterns\n';
+                [[xName,iscInference.x],...(yAxisEnabled?[[yName,iscInference.y]]:[])].forEach(([name,v])=>{inferCsv += `${csvEscape(name)},${v.n},${v.mean},${v.p},${v.method},${v.permutations}\n`;});
+                downloads.push({filename:'ISC_Inference.csv',body:inferCsv});
             }
             if (opts.gaze) {
                 const calCsv = buildCalibrationExportCsv();
