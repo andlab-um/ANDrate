@@ -145,7 +145,7 @@
         const checkReady = setInterval(() => {
             if (webgazer.isReady()) {
                 clearInterval(checkReady);
-                webgazer.showVideoPreview(true).showPredictionPoints(true);
+                webgazer.showVideoPreview(false).showPredictionPoints(true);
                 startCalibration();
             }
         }, 500);

@@ -72,7 +72,7 @@
             flex-direction: row; gap: 15px; box-sizing: border-box; align-items: stretch;
         }
         .webcam-wrapper {
-            flex: 3; border: 5px solid #FFCC00;
+            flex: 3; border: 5px solid #D1D1D6;
             border-radius: 12px; overflow: hidden; position: relative; background: #000;
             transition: border-color 0.2s;
         }
@@ -162,7 +162,7 @@
             <div class="webcam-panel" id="webcamPanel">
                 <div class="webcam-wrapper" id="webcamWrapper"></div>
                 <div class="webcam-btn-group">
-                    <button id="btnCam" onclick="toggleCam()">Camera</button>
+                    <button id="btnCam" class="inactive" onclick="toggleCam()">Camera</button>
                     <button id="btnGaze" onclick="toggleGaze()">Gaze Point</button>
                 </div>
             </div>
@@ -214,7 +214,7 @@
             alert("No target media selected. Choose a video or audio file on the configuration page.");
         }
 
-        let wgVideoVisible = true;
+        let wgVideoVisible = false;
         let wgPointVisible = true;
 
         if (useEyeTracking) {
@@ -238,23 +238,20 @@
                         let onTimeBar = (data.x >= controlsCard.left && data.x <= controlsCard.right && data.y >= controlsCard.top && data.y <= controlsCard.bottom);
                         let others = !onVideo && !onFunctionBar && !onTimeBar;
 
-                        // Use the webcam border color to show the active gaze area.
-                        if (onVideo) webcamWrapper.style.borderColor = '#34C759';
-                        else if (onFunctionBar) webcamWrapper.style.borderColor = '#0071E3';
-                        else if (onTimeBar) webcamWrapper.style.borderColor = '#FF9500';
-                        else webcamWrapper.style.borderColor = '#FFCC00';
 
                         if (!player.paused && !player.ended) {
                             gazeData.push({ ms: player.currentTime * 1000, x: data.x, y: data.y, onVideo: onVideo, onFunctionBar: onFunctionBar, onTimeBar: onTimeBar, others: others });
                         }
                     }).begin();
 
-            webgazer.showVideoPreview(true).showPredictionPoints(true);
+            webgazer.showVideoPreview(false).showPredictionPoints(true);
 
             const waitWg = setInterval(() => {
                 let wgContainer = document.getElementById('webgazerVideoContainer');
                 if (wgContainer) {
                     webcamWrapper.appendChild(wgContainer);
+                    wgContainer.style.opacity = wgVideoVisible ? '1' : '0';
+                    webgazer.showVideoPreview(wgVideoVisible);
                     clearInterval(waitWg);
                 }
             }, 100);
@@ -264,6 +261,7 @@
 
         function toggleCam() {
             wgVideoVisible = !wgVideoVisible;
+            webgazer.showVideoPreview(wgVideoVisible);
             let wgContainer = document.getElementById('webgazerVideoContainer');
             let btn = document.getElementById('btnCam');
             if (wgContainer) wgContainer.style.opacity = wgVideoVisible ? '1' : '0';
