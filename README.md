@@ -40,7 +40,7 @@ year = {2026}
 ___
 ## **Video Datasets**
 
-Please see [**NATVIEW datasets**](https://github.com/NathanKlineInstitute/NATVIEW_EEGFMRI/tree/main/stimulus) for more details. Please contact the author to remove video if there is any copyright concerns.
+Please see [**NATVIEW datasets**](https://github.com/NathanKlineInstitute/NATVIEW_EEGFMRI/tree/main/stimulus) for more details. 
 
 ___
 ## **Contact**
